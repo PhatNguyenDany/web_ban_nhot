@@ -7,9 +7,10 @@ import {
   Delete,
   NotFoundException,
   Put,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
-import { CreateProductDto } from './dto/create-product.dto';
+import { CreateProductDto, ProductFilterDTO } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { Product } from './entity/product.entity';
@@ -20,8 +21,8 @@ export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Get()
-  async findAll(): Promise<Product[]> {
-    return this.productsService.findAll();
+  async findAll(@Query() filterData: ProductFilterDTO): Promise<Product[]> {
+    return this.productsService.findAll(filterData);
   }
   @Get(':id')
   async findOne(@Param('id') id: number): Promise<Product> {

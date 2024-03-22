@@ -1,46 +1,80 @@
 import {
   Controller,
+  Get,
+  Param,
   Post,
+  Res,
+  UploadedFile,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
+import { ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
+import { extname } from 'path';
 
 @Controller('upload')
 @ApiTags('Upload')
 export class UploadController {
-  @Post('local')
+  @Get(':imgpath')
+  seeUploadedFile(@Param('imgpath') image, @Res() res) {
+    return res.sendFile(image, { root: './public/img' });
+  }
+
+  @Post('Uploads')
   @UseInterceptors(
-    FileInterceptor('files', {
+    FileInterceptor('image', {
       storage: diskStorage({
-        destination: 'public/img',
-        filename: (req, file, cb) => {
-          cb(null, file.originalname);
-        },
+        destination: './public/img',
+        filename: editFileName,
       }),
     }),
   )
-  @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        files: {
-          type: 'array', // 👈  array of files
-          items: {
-            type: 'string',
-            format: 'binary',
-          },
-        },
-      },
-    },
-  })
-  async local(@UploadedFiles() files: Array<Express.Multer.File>) {
-    return {
-      statusCode: 200,
-      data: files,
+  async uploadedFile(@UploadedFile() file) {
+    const response = {
+      originalname: file.originalname,
+      filename: file.filename,
     };
+    console.log(file);
+    return response;
+  }
+  @Post('multiple')
+  @UseInterceptors(
+    FilesInterceptor('image', 20, {
+      storage: diskStorage({
+        destination: './public/img',
+        filename: editFileName,
+      }),
+
+      fileFilter: imageFileFilter,
+    }),
+  )
+  async uploadMultipleFiles(@UploadedFiles() files) {
+    const response = [];
+    files.forEach((file) => {
+      const fileReponse = {
+        originalname: file.originalname,
+        filename: file.filename,
+      };
+      response.push(fileReponse);
+    });
+    return response;
   }
 }
+
+export const imageFileFilter = (req, file, callback) => {
+  if (!file.originalname.match(/\.(jpg|jpeg|png|gif)$/)) {
+    return callback(new Error('Only image files are allowed!'), false);
+  }
+  callback(null, true);
+};
+export const editFileName = (req, file, callback) => {
+  const name = file.originalname.split('.')[0];
+  const fileExtName = extname(file.originalname);
+  console.log(fileExtName);
+  const randomName = Array(4)
+    .fill(null)
+    .map(() => Math.round(Math.random() * 16).toString(16))
+    .join('');
+  callback(null, `${name}-${randomName}{fileExtName}`);
+};
