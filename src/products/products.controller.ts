@@ -36,6 +36,8 @@ export class ProductsController {
 
   @Post()
   async create(@Body() createProductDto: CreateProductDto) {
+    // kiểm tra coi image có gửi lên image, nếu có gửi lên thì xem nó tồn tại trong thư mục public/image ko
+    // xem các đọc file
     return this.productsService.create(createProductDto);
   }
 
