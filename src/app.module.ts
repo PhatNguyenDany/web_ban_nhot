@@ -12,11 +12,14 @@ import { OrderdetailsModule } from './orderdetails/orderdetails.module';
 import { ShippersModule } from './shippers/shippers.module';
 import { UploadModule } from './upload/upload.module';
 import { AuthModule } from './auth/auth.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
+    MulterModule.register({
+      dest: './public/img',
+    }),
     ConfigModule.forRoot({ envFilePath: '.env' }),
-    UsersModule,
     TypeOrmModule.forRoot({
       type: process.env.DB_TYPE as any,
       host: process.env.PG_HOST,
@@ -27,6 +30,7 @@ import { AuthModule } from './auth/auth.module';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
+    UsersModule,
     ProductsModule,
     SuppliersModule,
     CategoriesModule,

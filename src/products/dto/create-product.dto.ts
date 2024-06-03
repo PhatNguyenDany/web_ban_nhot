@@ -5,6 +5,20 @@ enum SortOptions {
   ASC = 'ASC',
   DESC = 'DESC',
 }
+export class ProductStoctDto {
+  @IsNotEmpty()
+  @ApiProperty()
+  variantId: number;
+
+  @ApiProperty()
+  priceIn: number;
+
+  @ApiProperty()
+  priceOut: number;
+
+  @ApiProperty()
+  stock: number;
+}
 export class CreateProductDto {
   @IsNotEmpty()
   @ApiProperty()
@@ -14,7 +28,7 @@ export class CreateProductDto {
   description: string;
 
   @ApiProperty()
-  variantId: number;
+  productStockId: number;
 
   @ApiProperty()
   supplierId: number;
@@ -22,31 +36,49 @@ export class CreateProductDto {
   @ApiProperty()
   categoryId: number;
 
+  @ApiProperty({ isArray: true, type: ProductStoctDto })
+  productstock: ProductStoctDto[];
+
   @ApiProperty()
   image: string[];
 }
 
 export class ProductFilterDTO {
   @ApiProperty()
+  skip: number;
+
+  @ApiProperty()
+  limit: number;
+
+  @ApiProperty({ required: false })
   productName: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   categoryId: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
   supplierId: number;
 
   @ApiProperty({
+    required: false,
     enum: SortOptions,
     isArray: true,
     example: [SortOptions.ASC, SortOptions.DESC],
   })
-  sortByDate: string;
+  sortByDate: SortOptions;
 
   @ApiProperty({
+    required: false,
     enum: SortOptions,
     isArray: true,
     example: [SortOptions.ASC, SortOptions.DESC],
   })
-  sortByPrice: string;
+  sortByPrice: SortOptions;
+}
+export class ProductFilterLimitDTO {
+  @ApiProperty()
+  skip: number;
+
+  @ApiProperty()
+  limit: number;
 }

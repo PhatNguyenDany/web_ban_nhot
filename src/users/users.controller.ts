@@ -7,11 +7,15 @@ import {
   Param,
   Delete,
   NotFoundException,
+  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ApiTags } from '@nestjs/swagger';
+import { RolesGuard } from 'src/enums/roles.guard';
+import { Roles } from 'src/enums/role.decorator';
+import { Role } from 'src/enums/role.enum';
 
 @Controller('users')
 @ApiTags('User')
@@ -20,12 +24,14 @@ export class UsersController {
 
   //get all users
   @Get()
+  @Roles(Role.Admin)
   async findAll(): Promise<User[]> {
     return this.usersService.findAll();
   }
 
   //get user by id
   @Get(':id')
+  @Roles(Role.Admin)
   async findOne(@Param('id') id: number): Promise<User> {
     const user = await this.usersService.findOne(id);
     if (!user) {

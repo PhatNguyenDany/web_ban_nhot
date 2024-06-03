@@ -9,7 +9,7 @@ import {
   JoinColumn,
   OneToMany,
 } from 'typeorm';
-import { Variant } from './variant.entity';
+import { ProductStock } from './productstock.entity';
 
 @Entity({ name: 'product' })
 export class Product extends SharedProp {
@@ -22,8 +22,8 @@ export class Product extends SharedProp {
   @Column({ nullable: false })
   description: string;
 
-  @Column({ name: 'variant_id', nullable: false })
-  variantId: number;
+  @Column()
+  productStockId: number;
 
   @Column({ name: 'supplier_id', nullable: false })
   supplierId: number;
@@ -36,14 +36,14 @@ export class Product extends SharedProp {
 
   @ManyToOne(() => Supplier, (supplier) => supplier.products, { eager: true })
   @JoinColumn({ name: 'supplier_id' })
-  suppliers: Supplier;
+  supplier: Supplier;
 
-  @ManyToOne(() => Category, (category) => category.categoryId, {
+  @ManyToOne(() => Category, (category) => category.products, {
     eager: true,
   })
   @JoinColumn({ name: 'category_id' })
-  categories: Category;
+  category: Category;
 
-  @OneToMany(() => Variant, (variant) => variant.variantId)
-  variant: Variant[];
+  @OneToMany(() => ProductStock, (productstock) => productstock.products)
+  productStock: ProductStock[];
 }
