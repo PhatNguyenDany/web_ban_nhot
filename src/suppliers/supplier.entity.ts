@@ -16,6 +16,6 @@ export class Supplier extends SharedProp {
   @Column({ nullable: false })
   phone: string;
 
-  @OneToMany(() => Product, (product) => product.supplierId) // Mỗi nhà cung cấp cung cấp nhiều sản phẩm
+  @OneToMany(() => Product, (product) => product.supplier) // Mỗi nhà cung cấp cung cấp nhiều sản phẩm
   products: Product[];
 }

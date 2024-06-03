@@ -26,14 +26,16 @@ export class User extends SharedProp {
   @Column({ name: 'birth_date', type: 'date', nullable: false })
   birthDate: Date;
 
-  @Column({ enum: ['USER', 'ADMIN'], default: 'USER' })
-  role: 'USER' | 'ADMIN';
-
   @Column({ nullable: false })
   username: string;
 
   @Column({ unique: true, nullable: false, length: 255 })
   password: string;
+
+  @Column({
+    nullable: false,
+  })
+  role: string;
 
   async validatePassword(password: string): Promise<boolean> {
     return bcrypt.compare(password, this.password);
