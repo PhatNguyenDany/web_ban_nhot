@@ -1,11 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './entity/product.entity';
-import {
-  ProductFilterDTO,
-  ProductFilterLimitDTO,
-} from './dto/create-product.dto';
+import { ProductFilterDTO } from './dto/create-product.dto';
 import { Variant } from './entity/variant.entity';
 import { ProductStock } from './entity/productstock.entity';
 
@@ -49,8 +46,8 @@ export class ProductsService {
         'category.description',
       ]);
     if (filter.productName) {
-      queryBuilder.andWhere('product.product_name = :productName', {
-        productName: filter.productName,
+      queryBuilder.andWhere('product.product_name LIKE :productName', {
+        productName: `%${filter.productName}%`,
       });
     }
     if (filter.categoryId) {
@@ -69,39 +66,60 @@ export class ProductsService {
     if (filter.sortByPrice) {
       queryBuilder.addOrderBy('productStock.priceOut', filter.sortByPrice);
     }
+    const count = await queryBuilder.getCount();
+    const totalPage = count / filter.limit;
+    if (filter.page > totalPage) {
+      throw new Error('page lớn hơn totalPage');
+    }
+    let skip = 0;
+    if (filter.page != 1) {
+      skip = filter.page * filter.limit;
+    }
     const product = await queryBuilder
-      .offset(filter.skip)
+      .offset(skip)
       .limit(filter.limit)
       .getMany();
 
-    const count = await queryBuilder.getCount();
     return { product, count };
-    // const query = { where: {}, order: {} } as any;
-    // }
-    // if (filter.productName) {
-    //   query.where.productName = filter.productName;
-    // }
-    // if (filter.categoryId) {
-    //   query.where.categoryId = filter.categoryId;
-    // }
-    // if (filter.supplierId) {
-    //   query.where.supplierId = filter.supplierId;
-    // }
-    // if (filter.sortByDate) {
-    //   query.order.createdAt = filter.sortByDate;
-    // }
-    // if (filter.sortByPrice) {
-    //   query.order.priceOut = filter.sortByPrice;
-    // }
-    // return this.productRepository.find({ ...query, relations: ['variant'] });
-    // lấy tổng số product có trong DB
-    // lấy số lượng product theo số lượng truyền vào
   }
 
   async findAllProductStock(): Promise<ProductStock[]> {
-    return this.productStockRepository.find({
-      relations: ['products', 'variant'],
-    });
+    const queryBuilder = await this.productStockRepository
+      .createQueryBuilder('productstock')
+      .innerJoinAndSelect('productstock.product', 'product')
+      .innerJoinAndSelect('productstock.variant', 'variant')
+      .innerJoinAndSelect('product.supplier', 'supplier')
+      .innerJoinAndSelect('product.category', 'category')
+      .select([
+        'productstock.productStockId',
+        'productstock.productId',
+        'productstock.variantId',
+        'productstock.priceIn',
+        'productstock.priceOut',
+        'productstock.stock',
+        'productstock.product',
+        'product.productName',
+        'product.productId',
+        'product.description',
+        'product.productStockId',
+        'product.supplierId',
+        'product.categoryId',
+        'product.image',
+        'supplier.supplierId',
+        'supplier.supplierName',
+        'supplier.address',
+        'supplier.phone',
+        'category.categoryId',
+        'category.categoryName',
+        'category.description',
+        'variant.variantId',
+        'variant.capacity',
+      ]);
+    const productStockFinal = await queryBuilder.getMany();
+    if (!productStockFinal) {
+      throw new NotFoundException('ProductStock does not exist!');
+    }
+    return productStockFinal;
   }
   async findAllVariant(): Promise<Variant[]> {
     return this.variantRepository.find();
@@ -111,10 +129,38 @@ export class ProductsService {
   }
 
   async findOne(productId: number): Promise<Product> {
-    return this.productRepository.findOne({
-      where: { productId },
-      relations: ['supplier', 'category', 'productStock'],
-    });
+    const queryBuilder = await this.productRepository
+      .createQueryBuilder('product')
+      .innerJoinAndSelect('product.productStock', 'productStock')
+      .innerJoinAndSelect('productStock.variant', 'variant')
+      .innerJoinAndSelect('product.supplier', 'supplier')
+      .innerJoinAndSelect('product.category', 'category')
+      .where('product.productId = :productId', { productId: productId })
+      .select([
+        'product.productId',
+        'product.productName',
+        'productStock.productStockId',
+        'productStock.productId',
+        'productStock.variantId',
+        'productStock.priceIn',
+        'productStock.priceOut',
+        'productStock.stock',
+        'product.image',
+        'variant.variantId',
+        'variant.capacity',
+        'supplier.supplierId',
+        'supplier.supplierName',
+        'supplier.address',
+        'supplier.phone',
+        'category.categoryId',
+        'category.categoryName',
+        'category.description',
+      ]);
+    const productFinal = await queryBuilder.getOne();
+    if (!productFinal) {
+      throw new NotFoundException('Product does not exist!');
+    }
+    return productFinal;
   }
 
   async createProduct(product: Partial<Product>): Promise<Product> {

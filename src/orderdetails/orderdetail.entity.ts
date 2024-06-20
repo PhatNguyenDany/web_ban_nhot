@@ -1,5 +1,5 @@
 import { Order } from 'src/orders/order.entity';
-import { Product } from 'src/products/entity/product.entity';
+import { ProductStock } from 'src/products/entity/productstock.entity';
 import { SharedProp } from 'src/sharedProp.helper';
 import {
   Entity,
@@ -15,19 +15,26 @@ export class OrderDetail extends SharedProp {
   orderDetailId: number;
 
   @Column({ name: 'order_id', nullable: false })
-  orderId: string;
+  orderId: number;
 
-  @Column({ name: 'product_id', nullable: false })
-  productId: number;
+  @Column({ name: 'productstockid', nullable: false })
+  productStockId: number;
 
   @Column({ nullable: false })
   quantity: number;
+
+  @Column({ nullable: false })
+  orderDetailTotal: number;
 
   @ManyToOne(() => Order, (order) => order.orderId, { eager: true })
   @JoinColumn({ name: 'order_id' })
   orders: Order;
 
-  @ManyToOne(() => Product, (product) => product.productId, { eager: true })
-  @JoinColumn({ name: 'product_id' })
-  products: Product;
+  @ManyToOne(
+    () => ProductStock,
+    (productStock) => productStock.productStockId,
+    { eager: true },
+  )
+  @JoinColumn({ name: 'productstockid' })
+  productStock: ProductStock;
 }

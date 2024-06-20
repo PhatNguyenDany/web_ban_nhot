@@ -11,30 +11,17 @@ import {
   OneToMany,
 } from 'typeorm';
 
-@Entity({ name: 'Order' })
-export class Order extends SharedProp {
-  @PrimaryGeneratedColumn({ name: 'order_id' })
-  orderId: number;
+@Entity({ name: 'preorder' })
+export class PreOrder extends SharedProp {
+  @PrimaryGeneratedColumn({ name: 'preorder_id' })
+  preOrderId: number;
 
   @Column({ name: 'user_id', nullable: false })
   userId: number;
 
-  @Column({ nullable: false })
-  total: number;
-
-  @Column({ name: 'shipper_id', nullable: false })
-  shipperId: number;
-
-  @Column({ nullable: false })
-  status: string;
-
   @ManyToOne(() => User, (user) => user.userId, { eager: true })
   @JoinColumn({ name: 'user_id' })
   user: User;
-
-  @ManyToOne(() => Shipper, (shipper) => shipper.shipperId, { eager: true })
-  @JoinColumn({ name: 'shipper_id' })
-  shippers: Shipper;
 
   @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.orderId) // Mỗi order sẽ có thể nhiều chi tiết Orderdetail
   orderDetails: OrderDetail[];

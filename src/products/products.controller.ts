@@ -21,7 +21,6 @@ import { readFile } from 'src/Util/util';
 import { ProductStock } from './entity/productstock.entity';
 import { Role } from 'src/enums/role.enum';
 import { Roles } from 'src/enums/role.decorator';
-import { AuthGuard } from '@nestjs/passport';
 import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
 import { RolesGuard } from 'src/enums/roles.guard';
 
@@ -39,16 +38,10 @@ export class ProductsController {
   ): Promise<{ product: Product[]; count: number }> {
     return this.productsService.findAll(filter);
   }
-
-  @Get('productStock')
-  async findAllProductStock(): Promise<ProductStock[]> {
-    return this.productsService.findAllProductStock();
-  }
-  @Get('variant')
-  async findAllVariant(): Promise<Variant[]> {
-    return this.productsService.findAllVariant();
-  }
   @Get('variant/:id')
+  @ApiBearerAuth('JWT')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async findOneVariant(@Param('id') id: number): Promise<Variant> {
     const variant = await this.productsService.findOneVariant(id);
     if (!variant) {
@@ -57,8 +50,38 @@ export class ProductsController {
       return variant;
     }
   }
+  @Get('productbyid/:id')
+  @ApiBearerAuth('JWT')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findOne(@Param('id') id: number): Promise<Product> {
+    const product = await this.productsService.findOne(id);
+    if (!product) {
+      throw new NotFoundException('Product does not exist!');
+    } else {
+      return product;
+    }
+  }
+
+  @Get('productStock')
+  @ApiBearerAuth('JWT')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findAllProductStock(): Promise<ProductStock[]> {
+    return this.productsService.findAllProductStock();
+  }
+  @Get('variant')
+  @ApiBearerAuth('JWT')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async findAllVariant(): Promise<Variant[]> {
+    return this.productsService.findAllVariant();
+  }
 
   @Post()
+  @ApiBearerAuth('JWT')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async create(@Body() createProductDto: CreateProductDto) {
     for (let i = 0; i < createProductDto.image.length; i++) {
       const imageData = readFile(createProductDto.image[i]);
@@ -93,6 +116,9 @@ export class ProductsController {
   }
 
   @Put(':id')
+  @ApiBearerAuth('JWT')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   async update(
     @Param('id') productId: number,
     @Body() updateProductDto: UpdateProductDto,
@@ -101,16 +127,10 @@ export class ProductsController {
   }
 
   @Delete(':id')
+  @ApiBearerAuth('JWT')
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   remove(@Param('id') id: string) {
     return this.productsService.remove(+id);
-  }
-  @Get(':id')
-  async findOne(@Param('id') id: number): Promise<Product> {
-    const product = await this.productsService.findOne(id);
-    if (!product) {
-      throw new NotFoundException('Product does not exist!');
-    } else {
-      return product;
-    }
   }
 }
