@@ -33,7 +33,7 @@ export class ProductStock extends SharedProp {
     eager: true,
   })
   @JoinColumn({ name: 'productId' })
-  products: Product;
+  product: Product;
 
   @ManyToOne(() => Variant, (variant) => variant.productstock, { eager: true })
   @JoinColumn({ name: 'variantId' })
