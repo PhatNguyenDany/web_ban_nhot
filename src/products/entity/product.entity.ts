@@ -44,6 +44,6 @@ export class Product extends SharedProp {
   @JoinColumn({ name: 'category_id' })
   category: Category;
 
-  @OneToMany(() => ProductStock, (productstock) => productstock.product)
+  @OneToMany(() => ProductStock, (productstock) => productstock.products)
   productStock: ProductStock[];
 }

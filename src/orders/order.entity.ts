@@ -17,16 +17,13 @@ export class Order extends SharedProp {
   orderId: number;
 
   @Column({ name: 'user_id', nullable: false })
-  userId: number;
+  userId: string;
 
-  @Column({ nullable: false })
-  total: number;
+  @Column({ name: 'order_date', type: 'date', nullable: false })
+  orderDate: number;
 
   @Column({ name: 'shipper_id', nullable: false })
   shipperId: number;
-
-  @Column({ nullable: false })
-  status: string;
 
   @ManyToOne(() => User, (user) => user.userId, { eager: true })
   @JoinColumn({ name: 'user_id' })

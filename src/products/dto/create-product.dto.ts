@@ -45,7 +45,7 @@ export class CreateProductDto {
 
 export class ProductFilterDTO {
   @ApiProperty()
-  page: number;
+  skip: number;
 
   @ApiProperty()
   limit: number;

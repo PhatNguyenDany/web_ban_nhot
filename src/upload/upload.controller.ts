@@ -6,17 +6,12 @@ import {
   Res,
   UploadedFile,
   UploadedFiles,
-  UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiTags } from '@nestjs/swagger';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { JwtAuthGuard } from 'src/auth/guard/jwt-auth.guard';
-import { Roles } from 'src/enums/role.decorator';
-import { Role } from 'src/enums/role.enum';
-import { RolesGuard } from 'src/enums/roles.guard';
 
 @Controller('upload')
 @ApiTags('upload')
@@ -27,9 +22,6 @@ export class UploadController {
   }
 
   @Post('uploads')
-  @ApiBearerAuth('JWT')
-  @Roles(Role.Admin)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @UseInterceptors(
     FileInterceptor('image', {
       storage: diskStorage({
@@ -47,9 +39,6 @@ export class UploadController {
     return response;
   }
   @Post('multiple')
-  @ApiBearerAuth('JWT')
-  @Roles(Role.Admin)
-  @UseGuards(JwtAuthGuard, RolesGuard)
   @UseInterceptors(
     FilesInterceptor('image', 20, {
       storage: diskStorage({
