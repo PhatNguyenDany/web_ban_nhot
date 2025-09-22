@@ -5,7 +5,7 @@ enum SortOptions {
   ASC = 'ASC',
   DESC = 'DESC',
 }
-export class ProductStoctDto {
+export class ProductStockDto {
   @IsNotEmpty()
   @ApiProperty()
   variantId: number;
@@ -23,21 +23,18 @@ export class CreateProductDto {
   @IsNotEmpty()
   @ApiProperty()
   productName: string;
-
+  
   @ApiProperty()
   description: string;
 
   @ApiProperty()
-  productStockId: number;
-
-  @ApiProperty()
   supplierId: number;
 
-  @ApiProperty()
+  @ApiProperty()  
   categoryId: number;
 
-  @ApiProperty({ isArray: true, type: ProductStoctDto })
-  productstock: ProductStoctDto[];
+  @ApiProperty({ isArray: true, type: ProductStockDto })
+  productstock: ProductStockDto[];
 
   @ApiProperty()
   image: string[];

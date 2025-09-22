@@ -15,6 +15,7 @@ import {
 export class Order extends SharedProp {
   @PrimaryGeneratedColumn({ name: 'order_id' })
   orderId: number;
+  
 
   @Column({ name: 'user_id', nullable: false })
   userId: number;
@@ -27,6 +28,9 @@ export class Order extends SharedProp {
 
   @Column({ nullable: false })
   status: string;
+
+  @Column({ name: 'order_date', type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  orderDate: Date;
 
   @ManyToOne(() => User, (user) => user.userId, { eager: true })
   @JoinColumn({ name: 'user_id' })

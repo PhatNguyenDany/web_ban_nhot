@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Products</title>
+    <link rel="stylesheet" href="/css/products.css"/>    
+</head>
+<body>
+    <header class="header">
+   <div class="logo">
+   <a href="/index.html">WEBBANNHOT.VN</a>
+  </div>
+    <input type="text" placeholder="Tìm kiếm sản phẩm..." class="search-bar" />
+    <div class="header-actions" id="auth-actions">
+      <!-- JS sẽ render đúng nút đăng nhập/đăng xuất ở đây -->
+  </div>
+    </header>
+
+    <h1 class="center">Product List</h1>
+
+    <div id="products-list"></div>
+
+    <div class="product-grid">
+      <div class="product-card">
+        <img src="/img/category-a5bfdd.webp" alt="Product Image" />
+        <h3>Product Name</h3>
+        <p>Description of the product.</p>
+        <span class="price">$19.99</span>
+      </div>
+      <div class="product-card">
+        <img src="/img/category-a5bfdd.webp" alt="Product Image" />
+        <h3>Product Name</h3>
+        <p>Description of the product.</p>
+        <span class="price">$19.99</span>
+      </div><div class="product-card">
+        <img src="/img/category-a5bfdd.webp" alt="Product Image" />
+        <h3>Product Name</h3>
+        <p>Description of the product.</p>
+        <span class="price">$19.99</span>
+      </div><div class="product-card">
+        <img src="/img/category-a5bfdd.webp" alt="Product Image" />
+        <h3>Product Name</h3>
+        <p>Description of the product.</p>
+        <span class="price">$19.99</span>
+      <!-- Thêm nhiều .product-card nếu cần -->
+    </div>
+    <script>
+      // Lấy categoryId từ URL
+  const urlParams = new URLSearchParams(window.location.search);
+  const categoryId = urlParams.get('categoryId');
+  console.log('categorybyId', categoryId)
+
+  if (categoryId) {
+    fetchProductsByCategory(categoryId);
+  }
+
+  async function fetchProductsByCategory(categoryId) {
+    try {
+      const res = await fetch(`/products?categoryId=${categoryId}`);
+      console.log('categoryid',categoryId)
+      if (!res.ok) throw new Error('Không tải được sản phẩm');
+
+      const products = await res.json();
+      const productList = document.getElementById('products-list');
+      // productList.innerHTML = '';
+
+      products.forEach(p => {
+        const div = document.createElement('div');
+        div.textContent = p.name;
+        productList.appendChild(div);
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+    
+    const authActions = document.getElementById('auth-actions');
+    const accessToken = localStorage.getItem('access_token');
+  
+    if (accessToken) {
+      // Nếu đã đăng nhập
+      authActions.innerHTML = `
+        <a href="#" id="logout-btn">Đăng xuất</a>
+        <a href="#">Giỏ hàng</a>
+      `;
+  
+      document.getElementById('logout-btn').addEventListener('click', () => {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href = 'index.html';
+        location.reload();
+      });
+    } else {
+      // Nếu chưa đăng nhập
+      authActions.innerHTML = `
+        <a href="login.html">Đăng nhập</a>
+        <a href="#">Giỏ hàng</a>
+      `;
+    }
+    </script>
+</body>
+</html>

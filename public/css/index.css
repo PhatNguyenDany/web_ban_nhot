@@ -1,0 +1,132 @@
+/* Reset CSS: Đảm bảo các phần tử có margin, padding bằng 0 và box-sizing là border-box */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Arial', sans-serif;
+}
+
+/* Cấu hình nền trang */
+body {
+  background: #f5f5f5; /* Màu nền trang */
+}
+
+/* Header: Thanh điều hướng */
+.header {
+  background: #1998a7;
+  color: white;
+  padding: 10px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); /* Thêm bóng cho header */
+}
+
+/* Logo trong header */
+.logo {
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+/* Thanh tìm kiếm */
+.search-bar {
+  flex: 1;
+  margin: 0 20px;
+  padding: 8px 10px;
+  border-radius: 4px;
+  border: none;
+  font-size: 1em;
+  background-color: #ffffff;
+}
+
+/* Các hành động trong header (đăng nhập, giỏ hàng) */
+.header-actions a {
+  color: white;
+  margin-left: 15px;
+  text-decoration: none;
+  font-size: 1em;
+}
+
+/* Main container */
+.main-container {
+  display: flex;
+  margin: 20px;
+}
+
+/* Sidebar - cột danh mục */
+.sidebar {
+  width: 220px;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  margin-right: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+}
+
+/* Tiêu đề danh mục trong sidebar */
+.sidebar h3 {
+  font-size: clamp(10px, 2vw, 14px);
+  background: #1998a7;
+  margin-left: -16px;
+  margin-right: -16px;
+  padding: 10px 16px;
+  width: calc(100% + 32px);
+  box-sizing: border-box;
+  border-radius: 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  color: #fff;
+}
+
+/* Danh sách các mục trong sidebar */
+.sidebar ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.sidebar li {
+  padding: 10px 0;
+  border-bottom: 1px solid #eee;
+  cursor: pointer;
+  font-size: 1em;
+  color: #333;
+}
+
+.sidebar li:hover {
+  background-color: #1998a7;
+  color: white;
+}
+
+/* Content chính */
+.content {
+  flex: 1;
+}
+
+/* Banner chính */
+.banner-main img {
+  width: 100%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Grid banner */
+.banner-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 20px;
+}
+
+/* Các ảnh trong banner grid */
+.banner-grid img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}

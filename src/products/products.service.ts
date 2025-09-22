@@ -1,10 +1,13 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Body, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from './entity/product.entity';
-import { ProductFilterDTO } from './dto/create-product.dto';
+import { CreateProductDto, ProductFilterDTO } from './dto/create-product.dto';
 import { Variant } from './entity/variant.entity';
 import { ProductStock } from './entity/productstock.entity';
+import { CreateProductStockDto } from './dto/create-productstock.dto';
+import { CreateVariantDto } from './dto/create-variant.dto';
+import { readFile } from 'src/Util/util';
 
 @Injectable()
 export class ProductsService {
@@ -67,14 +70,11 @@ export class ProductsService {
       queryBuilder.addOrderBy('productStock.priceOut', filter.sortByPrice);
     }
     const count = await queryBuilder.getCount();
-    const totalPage = count / filter.limit;
-    if (filter.page > totalPage) {
-      throw new Error('page lớn hơn totalPage');
-    }
-    let skip = 0;
-    if (filter.page != 1) {
-      skip = filter.page * filter.limit;
-    }
+    const totalPage = Math.ceil(count / filter.limit || 1);
+if (filter.page > totalPage) {
+  throw new NotFoundException(`Page ${filter.page} exceeds total pages (${totalPage})`);
+}
+const skip = (filter.page - 1) * filter.limit;
     const product = await queryBuilder
       .offset(skip)
       .limit(filter.limit)
@@ -84,7 +84,7 @@ export class ProductsService {
   }
 
   async findAllProductStock(): Promise<ProductStock[]> {
-    const queryBuilder = await this.productStockRepository
+    const queryBuilder = this.productStockRepository
       .createQueryBuilder('productstock')
       .innerJoinAndSelect('productstock.product', 'product')
       .innerJoinAndSelect('productstock.variant', 'variant')
@@ -116,8 +116,8 @@ export class ProductsService {
         'variant.capacity',
       ]);
     const productStockFinal = await queryBuilder.getMany();
-    if (!productStockFinal) {
-      throw new NotFoundException('ProductStock does not exist!');
+    if (!productStockFinal || productStockFinal.length === 0) {
+      throw new NotFoundException('No product stock found');
     }
     return productStockFinal;
   }
@@ -162,19 +162,51 @@ export class ProductsService {
     }
     return productFinal;
   }
+  
+  async createFullProduct(createProductDto: CreateProductDto): Promise<Product>  {
+      for (const image of createProductDto.image)  {
+        const imageData = readFile(image);
+        if (!imageData) {
+          throw new NotFoundException('ImageData does not exist!');
+        }
+      }
+      const newProduct =
+        await this.createProduct(createProductDto);
+      const productStockDataAll = [];
+      for (let i = 0; i < createProductDto.productstock.length; i++) {
+        const stockItem = createProductDto.productstock[i];
+      
+        const variantData = await this.findOneVariant(stockItem.variantId);
+        if (!variantData) {
+          throw new NotFoundException('VariantData does not exist!');
+        }
+      
+        const createStockDto: CreateProductStockDto = {
+          ...stockItem,
+          productId: newProduct.productId, 
+        };
+      
+        const productStockData = await this.createProductStock(createStockDto);
+        productStockDataAll.push(productStockData);
+      }
+      newProduct['productStock'] = productStockDataAll;
+    return newProduct;
+    }
 
-  async createProduct(product: Partial<Product>): Promise<Product> {
-    const newProduct = this.productRepository.create(product);
+  async createProduct(createProductDto: CreateProductDto): Promise<Product> {
+    const newProduct = this.productRepository.create(createProductDto);
     return this.productRepository.save(newProduct);
   }
   async createProductStock(
-    productStock: Partial<ProductStock>,
+    createProductStockDto: CreateProductStockDto,
   ): Promise<ProductStock> {
-    const newProductStock = this.productStockRepository.create(productStock);
+    const newProductStock = this.productStockRepository.create(createProductStockDto);
     return this.productStockRepository.save(newProductStock);
   }
-  async createVariant(variant: Partial<Variant>): Promise<Variant> {
-    const newVariant = this.variantRepository.create(variant);
+  async createVariant(
+    createVariantDto: CreateVariantDto,
+  ): Promise<Variant> {
+    const newVariant = this.variantRepository.create(createVariantDto);
     return this.variantRepository.save(newVariant);
   }
   async update(productId: number, product: Partial<Product>): Promise<Product> {
@@ -183,6 +215,10 @@ export class ProductsService {
   }
 
   async remove(productId: number): Promise<void> {
+    const found = await this.productRepository.findOne({ where: { productId } });
+    if (!found) {
+      throw new NotFoundException('Product not found');
+    }
     await this.productRepository.delete(productId);
   }
 }

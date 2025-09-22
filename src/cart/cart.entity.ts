@@ -1,28 +1,27 @@
-import { OrderDetail } from 'src/orderdetails/orderdetail.entity';
-import { SharedProp } from 'src/sharedProp.helper';
-import { Shipper } from 'src/shippers/shipper.entity';
-import { User } from 'src/users/user.entity';
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
-} from 'typeorm';
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToMany, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { CartItem } from "./cart-item.entity";
+import { User } from "src/users/user.entity";
 
-@Entity({ name: 'preorder' })
-export class PreOrder extends SharedProp {
-  @PrimaryGeneratedColumn({ name: 'preorder_id' })
-  preOrderId: number;
+@Entity()
+export class Cart {
+  @PrimaryGeneratedColumn()
+  id: number;
 
-  @Column({ name: 'user_id', nullable: false })
+  @Column()
   userId: number;
 
-  @ManyToOne(() => User, (user) => user.userId, { eager: true })
-  @JoinColumn({ name: 'user_id' })
-  user: User;
+  @Column()
+  totalCartPrice: number;
 
-  @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.orderId) // Mỗi order sẽ có thể nhiều chi tiết Orderdetail
-  orderDetails: OrderDetail[];
+  @OneToMany(() => CartItem, item => item.cart, { cascade: true, eager: true })
+  items: CartItem[];
+
+  @ManyToOne(() => User, (user) => user.carts, { nullable: false })
+user: User;
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

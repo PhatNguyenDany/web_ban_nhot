@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards, Headers } from '@nestjs/common';
+import { Body, Controller, Post, UseGuards, Headers, Res} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { SignInDto } from './dto/sign-in.dto';
@@ -10,6 +10,7 @@ import { LocalAuthGuard } from './guard/local-auth.guard';
 import { JwtRefreshTokenGuard } from './guard/jwt-refresh-token.guard';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { Response } from 'express';
 @Controller('auth')
 @ApiTags('Auth')
 @ApiBearerAuth('JWT')
@@ -26,11 +27,19 @@ export class AuthController {
   }
 
   @Public()
-  @UseGuards(LocalAuthGuard)
-  @Post('sign-in')
-  async signIn(@Body() signInDto: SignInDto) {
-    return this.authService.signIn(signInDto);
-  }
+@UseGuards(LocalAuthGuard)
+@Post('sign-in')
+async signIn(@Body() signInDto: SignInDto, @Res() res: Response) {
+    try {
+        const result = await this.authService.signIn(signInDto);
+        return res.status(200).json({
+            access_token: result.access_token,
+            refresh_token: result.refresh_token,
+        });
+    } catch (error) {
+        return res.status(401).json({ message: 'Invalid username or password' });
+    }
+}
 
   @UseGuards(JwtRefreshTokenGuard)
   @Post('refresh-token')
