@@ -1,9 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
-import { UpdateSupplierDto } from './dto/update-supplier.dto';
+// import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { Supplier } from './supplier.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { UpdateSupplierDto } from './dto/update-supplier.dto';
 
 @Injectable()
 export class SuppliersService {
@@ -26,13 +27,18 @@ export class SuppliersService {
 
   async update(
     supplierId: number,
-    supplier: Partial<Supplier>,
-  ): Promise<Supplier> {
+    supplier: UpdateSupplierDto,
+  ): Promise<Supplier> {const existing = await this.supplierRepository.findOne({ where: { supplierId } });
+  if (!existing) {
+    throw new NotFoundException(`Supplier with id ${supplierId} not found`);}
     await this.supplierRepository.update(supplierId, supplier);
-    return this.supplierRepository.findOne({ where: { supplierId } });
+  return this.supplierRepository.findOne({ where: { supplierId } });
   }
 
   async remove(supplierId: number): Promise<void> {
-    await this.supplierRepository.delete(supplierId);
+    const result = await this.supplierRepository.delete(supplierId);
+    if (result.affected === 0) {
+      throw new NotFoundException(`Supplier with id ${supplierId} not found`);
+    }
   }
 }

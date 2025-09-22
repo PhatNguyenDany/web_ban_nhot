@@ -22,7 +22,6 @@ export class JwtRefreshTokenStrategy extends PassportStrategy(
       ignoreExpiration: false,
       secretOrKey: process.env.JWT_SECRET || 'secret',
     });
-    this.logger.warn('JwtRefreshTokenStrategy initialized');
   }
 
   async validate(payload: JwtPayload): Promise<any> {

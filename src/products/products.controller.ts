@@ -9,15 +9,16 @@ import {
   Put,
   Query,
   UseGuards,
+  Patch,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { CreateProductDto, ProductFilterDTO } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { Product } from './entity/product.entity';
 import { CreateVariantDto } from './dto/create-variant.dto';
 import { Variant } from './entity/variant.entity';
-import { readFile } from 'src/Util/util';
 import { ProductStock } from './entity/productstock.entity';
 import { Role } from 'src/enums/role.enum';
 import { Roles } from 'src/enums/role.decorator';
@@ -31,6 +32,7 @@ export class ProductsController {
 
   @Get()
   @ApiBearerAuth('JWT')
+  @ApiOperation({summary:'Retrieve all products'})
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async findAll(
@@ -40,9 +42,10 @@ export class ProductsController {
   }
   @Get('variant/:id')
   @ApiBearerAuth('JWT')
+  @ApiOperation({summary:'Retrieve variant by a ID'})
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async findOneVariant(@Param('id') id: number): Promise<Variant> {
+  async findOneVariant(@Param('id', ParseIntPipe) id: number): Promise<Variant> {
     const variant = await this.productsService.findOneVariant(id);
     if (!variant) {
       throw new NotFoundException('Variant does not exist!');
@@ -52,9 +55,10 @@ export class ProductsController {
   }
   @Get('productbyid/:id')
   @ApiBearerAuth('JWT')
+  @ApiOperation({summary:'Retrieve product by a ID'})
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async findOne(@Param('id') id: number): Promise<Product> {
+  async findOne( @Param('id', ParseIntPipe) id: number): Promise<Product> {
     const product = await this.productsService.findOne(id);
     if (!product) {
       throw new NotFoundException('Product does not exist!');
@@ -65,6 +69,7 @@ export class ProductsController {
 
   @Get('productStock')
   @ApiBearerAuth('JWT')
+  @ApiOperation({summary:'Retrieve all productStock'})
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async findAllProductStock(): Promise<ProductStock[]> {
@@ -72,6 +77,7 @@ export class ProductsController {
   }
   @Get('variant')
   @ApiBearerAuth('JWT')
+  @ApiOperation({summary:'Retrieve all variant'})
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async findAllVariant(): Promise<Variant[]> {
@@ -80,57 +86,40 @@ export class ProductsController {
 
   @Post()
   @ApiBearerAuth('JWT')
+  @ApiOperation({summary:'Create new Product and ProductStock'})
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  async create(@Body() createProductDto: CreateProductDto) {
-    for (let i = 0; i < createProductDto.image.length; i++) {
-      const imageData = readFile(createProductDto.image[i]);
-      if (!imageData) {
-        throw new NotFoundException('ImageData does not exist!');
-      }
-    }
-    const newProduct =
-      await this.productsService.createProduct(createProductDto);
-    const productStockDataAll = [];
-    for (let i = 0; i < createProductDto.productstock.length; i++) {
-      const productStock = createProductDto.productstock[i];
-      productStock['productId'] = newProduct.productId;
-
-      const variantData = await this.productsService.findOneVariant(
-        productStock.variantId,
-      );
-      if (!variantData) {
-        throw new NotFoundException('VariantData does not exist!');
-      }
-      const productStockData =
-        await this.productsService.createProductStock(productStock);
-      productStockDataAll.push(productStockData);
-    }
-    newProduct['productStock'] = productStockDataAll;
-    return newProduct;
+  async create(@Body() createProductDto: CreateProductDto): Promise<Product>  {
+    return this.productsService.createFullProduct(createProductDto);
   }
 
   @Post('variant')
-  async createVariant(@Body() createvariantDto: CreateVariantDto) {
+  @ApiBearerAuth('JWT')
+  @ApiOperation({summary:'Create new variant'}) 
+  @Roles(Role.Admin)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async createVariant(@Body() createvariantDto: CreateVariantDto): Promise<Variant>  {
     return this.productsService.createVariant(createvariantDto);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiBearerAuth('JWT')
+  @ApiOperation({ summary: 'Update product by a ID' })
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
   async update(
-    @Param('id') productId: number,
+    @Param('id', ParseIntPipe) productId: number,
     @Body() updateProductDto: UpdateProductDto,
-  ): Promise<any> {
+  ): Promise<Product> {
     return this.productsService.update(productId, updateProductDto);
   }
 
   @Delete(':id')
   @ApiBearerAuth('JWT')
+  @ApiOperation({ summary: 'Delete product by a Id' })
   @Roles(Role.Admin)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  remove(@Param('id') id: string) {
-    return this.productsService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number): Promise<void>  {
+    return this.productsService.remove(id);
   }
 }

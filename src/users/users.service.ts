@@ -1,4 +1,4 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './user.entity';
@@ -42,13 +42,31 @@ export class UsersService {
     user.role = Role.User;
     return this.userRepository.save(user);
   }
+  
+ async comparePassword(plainText: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(plainText, hash);
+}
+
+  async changePassword(id: number, newPassword: string) {
+    const salt = await bcrypt.genSalt();
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+    return this.userRepository.update(id, { password: hashedPassword });
+  }
 
   async update(userId: number, user: Partial<User>): Promise<User> {
+    const existingUser = await this.userRepository.findOne({ where: { userId } });
+    if (!existingUser) {
+      throw new NotFoundException('User not found');
+    }
     await this.userRepository.update({ userId }, user);
     return this.userRepository.findOne({ where: { userId } });
   }
 
-  async remove(userId: number): Promise<void> {
-    await this.userRepository.delete(userId);
+  async remove(userId: number): Promise<{ message: string }> {
+    const result = await this.userRepository.delete(userId);
+    if (result.affected === 0) {
+      throw new NotFoundException('User not found');
+    }
+    return { message: 'User deleted successfully' };
   }
 }

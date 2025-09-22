@@ -1,32 +1,10 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
-enum SortOptions {
-  ASC = 'ASC',
-  DESC = 'DESC',
-}
+import { IsInt, IsNotEmpty } from "class-validator";
+import { ProductStockDto } from "./create-product.dto";
+import { ApiProperty } from "@nestjs/swagger";
 
-export class CreateProductStockDto {
+export class CreateProductStockDto extends ProductStockDto {
   @IsNotEmpty()
+  @IsInt()
   @ApiProperty()
   productId: number;
-
-  @ApiProperty()
-  variantId: number;
-
-  @ApiProperty({
-    enum: SortOptions,
-    isArray: true,
-    example: [SortOptions.ASC, SortOptions.DESC],
-  })
-  priceIn: SortOptions;
-
-  @ApiProperty({
-    enum: SortOptions,
-    isArray: true,
-    example: [SortOptions.ASC, SortOptions.DESC],
-  })
-  priceOut: SortOptions;
-
-  @ApiProperty()
-  stock: number;
 }

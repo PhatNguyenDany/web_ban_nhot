@@ -19,7 +19,7 @@ export class OrderDetailService {
   }
 
   async findAll(): Promise<OrderDetail[]> {
-    const queryBuilder = await this.orderDetailRepository
+    const queryBuilder = this.orderDetailRepository
       .createQueryBuilder('orderDetail')
       .innerJoinAndSelect('orderDetail.orders', 'order')
       .innerJoinAndSelect('orderDetail.productStock', 'productStock')
