@@ -29,9 +29,7 @@ export class ProductStock extends SharedProp {
   @Column({ nullable: false })
   stock: number;
 
-  @ManyToOne(() => Product, (product) => product.productStock, {
-    eager: true,
-  })
+  @ManyToOne(() => Product, (product) => product.productStock, { eager: true })
   @JoinColumn({ name: 'productId' })
   product: Product;
 

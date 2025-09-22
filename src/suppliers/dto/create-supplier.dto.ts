@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty } from 'class-validator';
+import { IsNotEmpty, IsString, Matches } from 'class-validator';
 
 export class CreateSupplierDto {
   @IsNotEmpty()
@@ -9,6 +9,11 @@ export class CreateSupplierDto {
   @ApiProperty()
   address: string;
 
-  @ApiProperty()
-  phone: string;
+  @ApiProperty({ description: 'Phone number of the user' })
+  @IsNotEmpty()
+  @IsString()
+     @Matches(/^(0|\+84)\d{9,10}$/, {
+        message: 'Phone number must be valid Vietnamese format',
+      })
+    phone: string;
 }

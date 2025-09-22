@@ -23,6 +23,9 @@ export class OrderDetail extends SharedProp {
   @Column({ nullable: false })
   quantity: number;
 
+  @Column({ name: 'price', nullable: false })
+  price: number;
+
   @Column({ nullable: false })
   orderDetailTotal: number;
 

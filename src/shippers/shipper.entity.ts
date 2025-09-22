@@ -2,7 +2,7 @@ import { Order } from 'src/orders/order.entity';
 import { SharedProp } from 'src/sharedProp.helper';
 import { Entity, Column, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
-@Entity()
+@Entity('shippers')
 export class Shipper extends SharedProp {
   @PrimaryGeneratedColumn({ name: 'shipper_id' })
   shipperId: number;

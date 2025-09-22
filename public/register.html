@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Đăng Ký</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <div class="login-container">
+    <div class="logo">WEBBANNHOT.VN</div>
+
+  <form id="register-form">
+  <input type="text" name="firstName" placeholder="Họ" required autocomplete="off" />
+  <input type="text" name="lastName" placeholder="Tên" required autocomplete="off" />
+  <input type="text" name="address" placeholder="Địa chỉ" required autocomplete="off" />
+  <input type="text" name="phone" placeholder="Số điện thoại (VD: 0989xxxxxx)" required autocomplete="off" />
+  <input type="email" name="email" placeholder="Email" required autocomplete="off" />
+  <input type="date" name="birthDate" placeholder="Ngày sinh" required autocomplete="off" />
+  <input type="text" name="username" placeholder="Tên đăng nhập" required autocomplete="off" />
+  <input type="password" name="password" placeholder="Mật khẩu" required minlength="6" autocomplete="new-password" />
+  <input type="password" name="confirmPassword" placeholder="Nhập lại mật khẩu" required minlength="6" autocomplete="new-password" />
+  <button type="submit">Đăng ký</button>
+</form>
+
+    <div id="response"></div>
+
+    <div class="footer">Đã có tài khoản? <a href="login.html">Đăng nhập</a></div>
+  </div>
+
+  <script>
+    document.getElementById('register-form').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const form = e.target;
+
+    const password = form.password.value;
+    const confirmPassword = form.confirmPassword.value;
+
+    if (password !== confirmPassword) {
+      document.getElementById('response').textContent = 'Mật khẩu nhập lại không khớp!';
+      return;
+    }
+
+    const data = {
+      firstName: form.firstName.value,
+      lastName: form.lastName.value,
+      address: form.address.value,
+      phone: form.phone.value,
+      email: form.email.value,
+      birthDate: form.birthDate.value,
+      username: form.username.value,
+      password: password,
+    };
+
+    try {
+      const res = await fetch('/auth/sign-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const text = await res.text();
+      if (!res.ok) {
+        console.error('Phản hồi lỗi:', text);
+        throw new Error('Đăng ký thất bại');
+      }
+
+      alert('Đăng ký thành công!');
+      document.getElementById('register-form').reset(); // reset form
+      window.location.href = 'login.html';
+    } catch (err) {
+      console.error('Lỗi đăng ký:', err);
+      document.getElementById('response').textContent = 'Đăng ký thất bại! Vui lòng thử lại.';
+    }
+  });
+  </script>
+
+</body>
+</html>

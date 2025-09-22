@@ -22,9 +22,6 @@ export class Product extends SharedProp {
   @Column({ nullable: false })
   description: string;
 
-  @Column()
-  productStockId: number;
-
   @Column({ name: 'supplier_id', nullable: false })
   supplierId: number;
 

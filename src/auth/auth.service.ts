@@ -29,6 +29,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Invalid username or password');
     }
+    this.logger.log(`✅ User signed in successfully`);
 
     const payload = {
       sub: user.userId,
@@ -49,9 +50,9 @@ export class AuthService {
     };
   }
 
-  async validateUser(username: string, password: string): Promise<any> {
+  async validateUser(username: string, password: string): Promise<Omit<User, 'password'> | null>{
     const user = await this.usersService.findByUsername(username);
-    if (user && (await user.validatePassword(password))) {
+    if (user && await this.usersService.comparePassword(password, user.password) ) {
       const { password, ...result } = user;
       return result;
     }

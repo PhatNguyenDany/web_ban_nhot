@@ -13,13 +13,17 @@ import { ShippersModule } from './shippers/shippers.module';
 import { UploadModule } from './upload/upload.module';
 import { AuthModule } from './auth/auth.module';
 import { MulterModule } from '@nestjs/platform-express';
+import { CartModule } from './cart/cart.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
+   
     MulterModule.register({
       dest: './public/img',
     }),
-    ConfigModule.forRoot({ envFilePath: '.env' }),
+    ConfigModule.forRoot({ isGlobal: true,  envFilePath: '.env' }),
     TypeOrmModule.forRoot({
       type: process.env.DB_TYPE as any,
       host: process.env.PG_HOST,
@@ -30,17 +34,24 @@ import { MulterModule } from '@nestjs/platform-express';
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
       synchronize: true,
     }),
+    
     UsersModule,
     ProductsModule,
     SuppliersModule,
+    CartModule,
     CategoriesModule,
     OrdersModule,
     OrderdetailsModule,
     ShippersModule,
-    UploadModule,
+    UploadModule, 
     AuthModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public')
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
-})
+}
+)
+
 export class AppModule {}

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Index</title>
+  <link rel="stylesheet" href="/css/index.css" />
+</head>
+
+<body>
+  <header class="header">
+    <div class="logo">WEBBANNHOT.VN</div>
+    <input type="text" placeholder="Tìm kiếm sản phẩm..." class="search-bar" />
+    <div class="header-actions" id="auth-actions">
+      <!-- JS sẽ tự render đúng nút đăng nhập/đăng xuất -->
+    </div>
+  </header>
+  <script>
+    async function loadCategories() {
+      try {
+        const res = await fetch('/categories', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!res.ok) throw new Error('Không tải được danh mục');
+
+        const categories = await res.json();
+        const categoryList = document.getElementById('category-list');
+        categoryList.innerHTML = ''; // Xóa nội dung cũ nếu có
+
+        // ✅ Render các <li> vào danh sách
+        categories.forEach(category => {
+          console.log(category)
+          const li = document.createElement('li');
+          li.innerHTML = `<a href="/products.html?categoryId=${category.id}">${category.categoryName}</a>`;
+          categoryList.appendChild(li);
+        });
+
+      } catch (err) {
+        console.error('Lỗi khi load danh mục:', err);
+      }
+    }
+    // Gọi hàm khi trang load
+    window.onload = () => {
+      loadCategories();
+
+      const authActions = document.getElementById('auth-actions');
+      const accessToken = localStorage.getItem('access_token');
+
+      if (accessToken) {
+        authActions.innerHTML = `
+        <a href="#" id="logout-btn">Đăng xuất</a>
+        <a href="#">Giỏ hàng</a>
+      `;
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          sessionStorage.clear();
+          document.cookie.split(';').forEach((cookie) => {
+            const cookieName = cookie.split('=')[0].trim();
+            document.cookie = `${cookieName}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`;
+          });
+          const form = document.getElementById('register-form') || document.getElementById('login-form');
+          if (form) form.reset();
+          location.reload();
+        });
+      } else {
+        authActions.innerHTML = `
+        <a href="login.html">Đăng nhập</a>
+        <a href="#">Giỏ hàng</a>`;
+      }
+    };
+  </script>
+  <div class="main-container">
+    <div class="sidebar">
+      <h3>DANH MỤC SẢN PHẨM</h3>
+      <ul id="category-list">
+        <!-- JS sẽ render các <li> ở đây -->
+      </ul>
+    </div>
+
+    <main class="content">
+      <div class="banner-main">
+        <img src="/img/banner_top_1_img_large-83d6f7.webp" alt="Banner chính" />
+      </div>
+
+      <div class="banner-grid">
+        <img src="/img/banner_top_2_img_large-44e106a.webp" />
+        <img src="/img/banner_top_1_img_large-83d6f7.webp" />
+        <img src="/img/banner_top_3_img_large-d3d5ec.webp" />
+        <img src="/img/categorybanner_1_img-a929510.webp" />
+      </div>
+    </main>
+  </div>
+</body>
+
+</html>

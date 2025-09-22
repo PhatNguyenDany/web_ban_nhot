@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Đăng Nhập</title>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+
+  <div class="login-container">
+    <div class="logo">WEBBANNHOT.VN</div>
+
+    <form id="login-form">
+      <input type="text" name="username" placeholder="Tên đăng nhập hoặc email" required  autocomplete="off"/>
+      <input type="password" name="password" placeholder="Mật khẩu" required autocomplete="new-password"/>
+      <button type="submit">Đăng nhập</button>
+    </form>
+
+    <div id="response"></div>
+
+    <a href="#">Quên mật khẩu?</a>
+    <div class="footer">Chưa có tài khoản? <a href="register.html">Đăng ký</a></div>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const form = e.target;
+      const data = {
+        username: form.username.value,
+        password: form.password.value,
+      };
+
+      try {
+        const res = await fetch('/auth/sign-in', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        const text = await res.text(); 
+
+        if (!res.ok) {
+          console.error('Phản hồi lỗi:', text);
+          throw new Error('Đăng nhập thất bại');
+        }
+
+        const result = JSON.parse(text); 
+        localStorage.setItem('access_token', result.access_token);
+        localStorage.setItem('refresh_token', result.refresh_token);
+        window.location.href = 'index.html';
+      } catch (err) {
+        console.error('Lỗi đăng nhập:', err);
+        document.getElementById('response').textContent = 'Đăng nhập thất bại! Kiểm tra lại thông tin.';
+      }
+    });
+  </script>
+</body>
+</html>

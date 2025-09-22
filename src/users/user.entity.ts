@@ -2,6 +2,7 @@ import { Order } from 'src/orders/order.entity';
 import { SharedProp } from 'src/sharedProp.helper';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { Cart } from 'src/cart/cart.entity';
 
 @Entity({ name: 'user' })
 export class User extends SharedProp {
@@ -37,10 +38,9 @@ export class User extends SharedProp {
   })
   role: string;
 
-  async validatePassword(password: string): Promise<boolean> {
-    return bcrypt.compare(password, this.password);
-  }
-
   @OneToMany(() => Order, (order) => order.userId) // Mỗi user sẽ có nhiều orders
   orders: Order[];
+
+  @OneToMany(() => Cart, (cart) => cart.user)
+carts: Cart[];
 }
