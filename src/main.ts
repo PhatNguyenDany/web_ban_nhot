@@ -6,7 +6,6 @@ import * as bodyParser from 'body-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.use(bodyParser.urlencoded({ extended: true }));
-
   const config = new DocumentBuilder()
     .setTitle('Oil example')
     .setDescription('The Oil API description')
@@ -18,6 +17,7 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/docs', app, document);
-  await app.listen(3000);
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 3000;
+  await app.listen(port, '0.0.0.0');
 }
 bootstrap();
