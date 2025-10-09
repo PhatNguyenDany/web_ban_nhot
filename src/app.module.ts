@@ -19,22 +19,53 @@ import { join } from 'path';
 
 @Module({
   imports: [
-   
+    // Dùng để upload ảnh
     MulterModule.register({
       dest: './public/img',
     }),
-    ConfigModule.forRoot({ isGlobal: true,  envFilePath: '.env' }),
-    TypeOrmModule.forRoot({
-      type: process.env.DB_TYPE as any,
-      host: process.env.PG_HOST,
-      port: parseInt(process.env.PG_PORT),
-      username: process.env.PG_USER,
-      password: process.env.PG_PASSWORD,
-      database: process.env.PG_DB,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
+
+    // Cấu hình biến môi trường
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
     }),
-    
+
+    // ✅ TypeORM config: ưu tiên DATABASE_URL khi deploy Render
+    TypeOrmModule.forRootAsync({
+      useFactory: () => {
+        if (process.env.DATABASE_URL) {
+          // --- Render PostgreSQL ---
+          return {
+            type: 'postgres',
+            url: process.env.DATABASE_URL,
+            autoLoadEntities: true,
+            synchronize: true, // chỉ nên bật ở dev
+            ssl: {
+              rejectUnauthorized: false,
+            },
+            extra: {
+              ssl: {
+                rejectUnauthorized: false,
+              },
+            },
+          };
+        } else {
+          // --- Local PostgreSQL ---
+          return {
+            type: process.env.DB_TYPE as any,
+            host: process.env.PG_HOST,
+            port: parseInt(process.env.PG_PORT),
+            username: process.env.PG_USER,
+            password: process.env.PG_PASSWORD,
+            database: process.env.PG_DB,
+            entities: [__dirname + '/**/*.entity{.ts,.js}'],
+            synchronize: true,
+          };
+        }
+      },
+    }),
+
+    // Các module của app
     UsersModule,
     ProductsModule,
     SuppliersModule,
@@ -43,15 +74,15 @@ import { join } from 'path';
     OrdersModule,
     OrderdetailsModule,
     ShippersModule,
-    UploadModule, 
+    UploadModule,
     AuthModule,
+
+    // Dùng để serve static files
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public')
+      rootPath: join(__dirname, '..', 'public'),
     }),
   ],
   controllers: [AppController],
   providers: [AppService],
-}
-)
-
+})
 export class AppModule {}
